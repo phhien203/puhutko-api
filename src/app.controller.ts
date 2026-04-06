@@ -1,5 +1,7 @@
 import {
   Controller,
+  HttpException,
+  HttpStatus,
   Get,
   Param,
   Post,
@@ -9,17 +11,43 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { PostsService } from './post.service';
+import { PrismaService } from './prisma.service';
 import {
   User as UserModel,
   Post as PostModel,
 } from './generated/prisma/client';
+
+type HealthCheckResponse = {
+  status: 'ok';
+  database: 'connected';
+};
 
 @Controller()
 export class AppController {
   constructor(
     private readonly userService: UsersService,
     private readonly postService: PostsService,
+    private readonly prismaService: PrismaService,
   ) {}
+
+  @Get('healthcheck')
+  async healthcheck(): Promise<HealthCheckResponse> {
+    try {
+      await this.prismaService.$queryRaw`SELECT 1`;
+      return {
+        status: 'ok',
+        database: 'connected',
+      };
+    } catch {
+      throw new HttpException(
+        {
+          status: 'error',
+          database: 'unavailable',
+        },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
 
   @Get('post/:id')
   async getPostById(@Param('id') id: string): Promise<PostModel | null> {
