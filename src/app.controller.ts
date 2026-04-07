@@ -1,21 +1,24 @@
 import {
+  Body,
   Controller,
+  Delete,
+  Get,
   HttpException,
   HttpStatus,
-  Get,
   Param,
   Post,
-  Body,
   Put,
-  Delete,
 } from '@nestjs/common';
-import { UsersService } from './user.service';
+
+import {
+  Post as PostModel,
+  User as UserModel,
+} from './generated/prisma/client';
+import { Auth } from './iam/authentication/decorators/auth.decorator';
+import { AuthType } from './iam/authentication/enum/auth-type';
 import { PostsService } from './post.service';
 import { PrismaService } from './prisma.service';
-import {
-  User as UserModel,
-  Post as PostModel,
-} from './generated/prisma/client';
+import { UsersService } from './user.service';
 
 type HealthCheckResponse = {
   status: 'ok';
@@ -54,6 +57,7 @@ export class AppController {
     return this.postService.post({ id: String(id) });
   }
 
+  @Auth(AuthType.None)
   @Get('feed')
   async getPublishedPosts(): Promise<PostModel[]> {
     return this.postService.posts({

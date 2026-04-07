@@ -1,12 +1,17 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
-import { PrismaService } from 'src/prisma.service';
 
+import { PrismaService } from 'src/prisma.service';
+import jwtConfig from '../config/jwt.config';
 import { HashingService } from '../hashing/hashing.service';
+import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 
@@ -15,6 +20,9 @@ export class AuthenticationService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly hashingService: HashingService,
+    private readonly jwtService: JwtService,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
   async signup(signUpDto: SignUpDto) {
@@ -59,7 +67,19 @@ export class AuthenticationService {
       throw new UnauthorizedException('Signin unsuccessfully!');
     }
 
-    // TODO
-    return true;
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+      } as ActiveUserData,
+      {
+        audience: this.jwtConfiguration.audience,
+        issuer: this.jwtConfiguration.issuer,
+        secret: this.jwtConfiguration.secret,
+        expiresIn: this.jwtConfiguration.accessTokenTtl,
+      },
+    );
+
+    return { accessToken };
   }
 }
