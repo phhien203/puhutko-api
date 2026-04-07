@@ -14,8 +14,6 @@ import {
   Post as PostModel,
   User as UserModel,
 } from './generated/prisma/client';
-import { Auth } from './iam/authentication/decorators/auth.decorator';
-import { AuthType } from './iam/authentication/enum/auth-type';
 import { PostsService } from './post.service';
 import { PrismaService } from './prisma.service';
 import { UsersService } from './user.service';
@@ -57,7 +55,6 @@ export class AppController {
     return this.postService.post({ id: String(id) });
   }
 
-  @Auth(AuthType.None)
   @Get('feed')
   async getPublishedPosts(): Promise<PostModel[]> {
     return this.postService.posts({
