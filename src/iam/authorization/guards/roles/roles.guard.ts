@@ -4,9 +4,9 @@ import { Request } from 'express';
 import { Observable } from 'rxjs';
 
 import { Role } from 'src/generated/prisma/enums';
+import { ROLE_KEY } from 'src/iam/authorization/decorators/role.decorator';
 import { REQUEST_USER_KEY } from 'src/iam/iam.constants';
 import { ActiveUserData } from 'src/iam/interfaces/active-user-data.interface';
-import { ROLE_KEY } from 'src/user/decorators/role.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
