@@ -12,11 +12,13 @@ import {
 
 import {
   Post as PostModel,
+  Role,
   User as UserModel,
 } from './generated/prisma/client';
 import { PostsService } from './post.service';
 import { PrismaService } from './prisma.service';
 import { UsersService } from './user.service';
+import { Roles } from './user/decorators/role.decorator';
 
 type HealthCheckResponse = {
   status: 'ok';
@@ -109,6 +111,7 @@ export class AppController {
     });
   }
 
+  @Roles(Role.admin)
   @Delete('post/:id')
   async deletePost(@Param('id') id: string): Promise<PostModel> {
     return this.postService.deletePost({ id: String(id) });

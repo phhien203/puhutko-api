@@ -121,6 +121,7 @@ export class AuthenticationService {
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken(user.id, this.jwtConfiguration.accessTokenTtl, {
         email: user.email,
+        role: user.role,
       }),
       this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl, {
         refreshTokenId,
